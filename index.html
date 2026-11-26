@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7f2">
+  <title>Margin — Notes workspace</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script defer src="./storage.js"></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <main id="welcome" class="welcome" hidden>
+    <div class="welcome-art">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">m</span> margin</div>
+      <div><h1>Give your ideas<br>some room.</h1><p>A workspace for the things you want to remember, work on, and share.</p></div>
+      <div class="art-lines" aria-hidden="true"></div>
+    </div>
+    <section class="auth-panel">
+      <form id="auth-form" class="auth-card">
+        <h2 id="auth-title">Sign in</h2>
+        <label id="name-label" hidden>Name<input id="name" name="name" maxlength="60" autocomplete="name" disabled></label>
+        <label>Email<input name="email" type="email" required maxlength="254" autocomplete="email"></label>
+        <label>Password<input id="password" name="password" type="password" minlength="8" maxlength="128" required autocomplete="current-password"></label>
+        <label id="confirm-label" hidden>Confirm password<input id="confirm-password" type="password" minlength="8" maxlength="128" autocomplete="new-password" disabled></label>
+        <p class="muted">This workspace saves to this browser.</p>
+        <p id="auth-error" class="form-error" role="alert" hidden></p>
+        <button id="auth-submit" type="submit" class="primary">Sign in</button>
+        <button id="auth-toggle" type="button" class="quiet">Create an account</button>
+      </form>
+    </section>
+  </main>
+
+  <main id="workspace" class="workspace" data-mobile="notes" hidden>
+    <aside id="sidebar" class="sidebar" aria-label="Workspace navigation">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">m</span> margin</div>
+      <button id="new-note" class="primary"><span aria-hidden="true">+</span> New note</button>
+      <nav id="views" aria-label="Notes views">
+        <button class="nav-button" data-view="all" aria-current="page"><span aria-hidden="true">▤</span> All notes</button>
+        <button class="nav-button" data-view="shared"><span aria-hidden="true">◉</span> Shared with me</button>
+      </nav>
+      <div class="folder-heading"><h2>Folders</h2><button id="new-folder" class="icon-button" aria-label="Create folder" title="Create folder">+</button></div>
+      <div id="folders" class="folder-list"></div>
+      <div class="account"><span id="avatar" class="avatar" aria-hidden="true"></span><span id="account-name"></span><button id="logout" class="quiet">Sign out</button></div>
+    </aside>
+    <section class="notes-pane" aria-label="Note list">
+      <div class="notes-head">
+        <div class="notes-heading"><button id="open-sidebar" class="icon-button mobile-only" aria-label="Open folders" aria-controls="sidebar" aria-expanded="false">☰</button><h1 id="view-title">All notes</h1></div>
+        <label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search notes" aria-label="Search notes"></label>
+        <p id="result-count" class="muted"></p>
+      </div>
+      <div id="note-list" class="note-list"></div>
+    </section>
+    <section class="editor-pane" aria-label="Note editor">
+      <div id="empty-editor" class="empty-editor"><h2>Your workspace</h2><p>Pick a note to open it.</p></div>
+      <div id="editor" class="editor" hidden>
+        <header class="editor-top">
+          <button id="back" class="quiet mobile-only">Notes</button>
+          <span id="save-status" class="save-status" role="status"></span>
+          <div class="editor-actions">
+            <button id="history" class="quiet">History</button>
+            <button id="share" class="quiet">Share</button>
+            <button id="save" class="primary">Save</button>
+          </div>
+        </header>
+        <div id="conflict" class="conflict" hidden>
+          <p id="conflict-message">A newer version was saved. Your draft is still here.</p>
+          <button id="use-latest" class="quiet">Use latest</button>
+          <button id="keep-draft" class="quiet">Keep draft</button>
+          <button id="copy-draft" class="quiet" hidden>Copy draft</button>
+        </div>
+        <div class="document">
+          <p id="note-meta" class="note-meta"></p>
+          <label class="sr-only" for="note-title">Note title</label>
+          <input id="note-title" class="note-title" maxlength="120" placeholder="Untitled note">
+          <div class="document-tools">
+            <label id="move-label">Folder <select id="move-note"></select></label>
+            <button id="delete-note" class="quiet danger">Delete note</button>
+          </div>
+          <label class="sr-only" for="note-text">Note text</label>
+          <textarea id="note-text" maxlength="60000" placeholder="Start writing…"></textarea>
+          <footer class="document-footer"><span id="word-count">0 words</span><span id="edited-date"></span></footer>
+        </div>
+      </div>
+    </section>
+    <button id="scrim" class="scrim" aria-label="Close navigation" hidden></button>
+  </main>
+  <p id="notification" class="notification" role="status" hidden></p>
+  <p id="loading" class="loading" role="status">Opening Margin…</p>
+
+  <dialog id="folder-dialog" aria-labelledby="folder-title">
+    <form id="folder-form">
+      <header class="dialog-head"><h2 id="folder-title">New folder</h2><button type="button" class="icon-button" data-close aria-label="Close">×</button></header>
+      <label>Folder name<input id="folder-name" required maxlength="60"></label>
+      <div class="dialog-actions"><button id="delete-folder" type="button" class="quiet danger" hidden>Delete folder</button><button class="primary" type="submit">Save folder</button></div>
+    </form>
+  </dialog>
+  <dialog id="share-dialog" aria-labelledby="share-title">
+    <header class="dialog-head"><h2 id="share-title">Share note</h2><button type="button" class="icon-button" data-close aria-label="Close">×</button></header>
+    <form id="share-form">
+      <label>Account email<input id="share-email" type="email" required maxlength="254"></label>
+      <label>Permission<select id="share-role"><option value="viewer">Viewer</option><option value="editor">Editor</option></select></label>
+      <button class="primary" type="submit">Share note</button>
+    </form>
+    <p class="muted">Share with another account created in this browser profile.</p>
+    <h3>People with access</h3>
+    <div id="share-list" class="share-list"></div>
+  </dialog>
+  <dialog id="history-dialog" aria-labelledby="history-title">
+    <header class="dialog-head"><h2 id="history-title">Version history</h2><button type="button" class="icon-button" data-close aria-label="Close">×</button></header>
+    <div id="version-list" class="version-list"></div>
+    <div id="version-preview" class="version-preview" hidden>
+      <h3 id="version-title"></h3><pre id="version-text"></pre>
+      <button id="restore" class="primary">Restore version</button>
+    </div>
+  </dialog>
+  <dialog id="confirm-dialog" aria-labelledby="confirm-title">
+    <form method="dialog">
+      <header class="dialog-head"><h2 id="confirm-title">Confirm action</h2></header>
+      <p id="confirm-message"></p>
+      <div class="dialog-actions"><button class="quiet" value="cancel" autofocus>Cancel</button><button id="confirm-accept" class="primary" value="confirm">Confirm</button></div>
+    </form>
+  </dialog>
+</body>
+</html>
